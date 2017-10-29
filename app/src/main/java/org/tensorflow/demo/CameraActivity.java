@@ -19,16 +19,41 @@ package org.tensorflow.demo;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interceptors.HttpLoggingInterceptor;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class CameraActivity extends Activity {
   private static final int PERMISSIONS_REQUEST = 1;
 
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
   private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
+  private static final String URL = "https://us-central1-devfest17-halloween.cloudfunctions.net/devfest11-halloween";
+
+  public static final MediaType JSON
+          = MediaType.parse("application/json; charset=utf-8");
+
+  OkHttpClient client;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -37,6 +62,53 @@ public class CameraActivity extends Activity {
 
     setContentView(R.layout.activity_camera);
 
+    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+    logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+    client = new OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build();
+    try {
+      Toast.makeText(getApplicationContext(), "trying post", Toast.LENGTH_SHORT).show();
+      post("test").execute();
+    } catch (IOException e) {
+      e.printStackTrace();
+
+    }
+
+
+
+/*    //Request post to
+    AndroidNetworking.initialize(getApplicationContext());
+
+    // Adding an Network Interceptor for Debugging purpose :
+    OkHttpClient okHttpClient = new OkHttpClient() .newBuilder()
+           // .addNetworkInterceptor(new StethoInterceptor())
+            .build();
+    AndroidNetworking.initialize(getApplicationContext(),okHttpClient);
+
+    AndroidNetworking.post("https://us-central1-devfest17-halloween.cloudfunctions.net/")
+            .addBodyParameter("devfest11-halloween")
+            .addBodyParameter("lastname", "Shekhar")
+            .setTag("test")
+            .setPriority(Priority.MEDIUM)
+            .build()
+            .getAsJSONObject(new JSONObjectRequestListener() {
+              @Override
+              public void onResponse(JSONObject response) {
+                // do anything with response
+              }
+              @Override
+              public void onError(ANError error) {
+                // handle error
+              }
+            });*/
+
+
+
+
+
+
+
     if (hasPermission()) {
       if (null == savedInstanceState) {
         setFragment();
@@ -44,6 +116,44 @@ public class CameraActivity extends Activity {
     } else {
       requestPermission();
     }
+
+  }
+
+  AsyncTask post( String json) throws IOException {
+
+
+   return new AsyncTask<String, Void ,String>(){
+
+      @Override
+      protected String doInBackground(String... params) {
+
+        String json = params[0];
+        Response response =null;
+
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(URL)
+                .post(body)
+                .build();
+
+        try {
+           response = client.newCall(request).execute();
+          return response.body().string();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+          return null;
+      }
+
+      @Override
+      protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+
+        Toast.makeText(getApplicationContext(), "response: "+s, Toast.LENGTH_SHORT).show();
+      }
+    };
+
+
 
   }
 
@@ -85,4 +195,5 @@ public class CameraActivity extends Activity {
             .replace(R.id.container, CameraConnectionFragment.newInstance())
             .commit();
   }
+
 }
