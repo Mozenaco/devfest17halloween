@@ -19,75 +19,176 @@ package org.tensorflow.demo;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interceptors.HttpLoggingInterceptor;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class CameraActivity extends Activity {
-  private static final int PERMISSIONS_REQUEST = 1;
+    private static final int PERMISSIONS_REQUEST = 1;
 
-  private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
-  private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
+    private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-  @Override
-  protected void onCreate(final Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    private static final String URL = "https://us-central1-devfest17-halloween.cloudfunctions.net/devfest11-halloween";
 
-    setContentView(R.layout.activity_camera);
+    public static final MediaType JSON
+            = MediaType.parse("application/json; charset=utf-8");
 
-    if (hasPermission()) {
-      if (null == savedInstanceState) {
-        setFragment();
-      }
-    } else {
-      requestPermission();
-    }
+    OkHttpClient client;
 
-  }
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-  @Override
-  public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-    switch (requestCode) {
-      case PERMISSIONS_REQUEST: {
-        if (grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-          setFragment();
+        setContentView(R.layout.activity_camera);
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+        client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+           // post("test").execute();
+
+
+
+/*    //Request post to
+    AndroidNetworking.initialize(getApplicationContext());
+
+    // Adding an Network Interceptor for Debugging purpose :
+    OkHttpClient okHttpClient = new OkHttpClient() .newBuilder()
+           // .addNetworkInterceptor(new StethoInterceptor())
+            .build();
+    AndroidNetworking.initialize(getApplicationContext(),okHttpClient);
+
+    AndroidNetworking.post("https://us-central1-devfest17-halloween.cloudfunctions.net/")
+            .addBodyParameter("devfest11-halloween")
+            .addBodyParameter("lastname", "Shekhar")
+            .setTag("test")
+            .setPriority(Priority.MEDIUM)
+            .build()
+            .getAsJSONObject(new JSONObjectRequestListener() {
+              @Override
+              public void onResponse(JSONObject response) {
+                // do anything with response
+              }
+              @Override
+              public void onError(ANError error) {
+                // handle error
+              }
+            });*/
+
+
+        if (hasPermission()) {
+            if (null == savedInstanceState) {
+                setFragment();
+            }
         } else {
-          requestPermission();
+            requestPermission();
         }
-      }
-    }
-  }
 
-  private boolean hasPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(PERMISSION_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    } else {
-      return true;
     }
-  }
 
-  private void requestPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA) || shouldShowRequestPermissionRationale(PERMISSION_STORAGE)) {
-        Toast.makeText(CameraActivity.this, "Camera AND storage permission are required for this demo", Toast.LENGTH_LONG).show();
-      }
-      requestPermissions(new String[] {PERMISSION_CAMERA, PERMISSION_STORAGE}, PERMISSIONS_REQUEST);
+    AsyncTask post(String json) throws IOException {
+
+
+        return new AsyncTask<String, Void, String>() {
+
+            @Override
+            protected String doInBackground(String... params) {
+
+                String json = params[0];
+                Response response = null;
+
+                RequestBody body = RequestBody.create(JSON, json);
+                Request request = new Request.Builder()
+                        .url(URL)
+                        .post(body)
+                        .build();
+
+                try {
+                    response = client.newCall(request).execute();
+                    return response.body().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+
+                Toast.makeText(getApplicationContext(), "response: " + s, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+
     }
-  }
 
-  private void setFragment() {
-    getFragmentManager()
-            .beginTransaction()
-            .replace(R.id.container, CameraConnectionFragment.newInstance())
-            .commit();
-  }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    setFragment();
+                } else {
+                    requestPermission();
+                }
+            }
+        }
+    }
+
+    private boolean hasPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(PERMISSION_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return true;
+        }
+    }
+
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA) || shouldShowRequestPermissionRationale(PERMISSION_STORAGE)) {
+                Toast.makeText(CameraActivity.this, "Camera AND storage permission are required for this demo", Toast.LENGTH_LONG).show();
+            }
+            requestPermissions(new String[]{PERMISSION_CAMERA, PERMISSION_STORAGE}, PERMISSIONS_REQUEST);
+        }
+    }
+
+    private void setFragment() {
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, CameraConnectionFragment.newInstance())
+                .commit();
+    }
+
 
     public void log(Classifier.Recognition result) {
-    Toast.makeText(this,R.string.app_name,Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.app_name, Toast.LENGTH_LONG).show();
     }
+
 }
