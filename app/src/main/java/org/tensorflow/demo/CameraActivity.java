@@ -69,37 +69,6 @@ public class CameraActivity extends Activity {
                 .addInterceptor(logging)
                 .build();
 
-           // post("test").execute();
-
-
-
-/*    //Request post to
-    AndroidNetworking.initialize(getApplicationContext());
-
-    // Adding an Network Interceptor for Debugging purpose :
-    OkHttpClient okHttpClient = new OkHttpClient() .newBuilder()
-           // .addNetworkInterceptor(new StethoInterceptor())
-            .build();
-    AndroidNetworking.initialize(getApplicationContext(),okHttpClient);
-
-    AndroidNetworking.post("https://us-central1-devfest17-halloween.cloudfunctions.net/")
-            .addBodyParameter("devfest11-halloween")
-            .addBodyParameter("lastname", "Shekhar")
-            .setTag("test")
-            .setPriority(Priority.MEDIUM)
-            .build()
-            .getAsJSONObject(new JSONObjectRequestListener() {
-              @Override
-              public void onResponse(JSONObject response) {
-                // do anything with response
-              }
-              @Override
-              public void onError(ANError error) {
-                // handle error
-              }
-            });*/
-
-
         if (hasPermission()) {
             if (null == savedInstanceState) {
                 setFragment();
@@ -118,7 +87,7 @@ public class CameraActivity extends Activity {
             @Override
             protected String doInBackground(String... params) {
 
-                String json = params[0];
+                String json ="{\"Pumpkin\": .5, \"Trump\":.1}";
                 Response response = null;
 
                 RequestBody body = RequestBody.create(JSON, json);
@@ -140,7 +109,7 @@ public class CameraActivity extends Activity {
             protected void onPostExecute(String s) {
                 super.onPostExecute(s);
 
-                Toast.makeText(getApplicationContext(), "response: " + s, Toast.LENGTH_SHORT).show();
+
             }
         };
 
@@ -188,7 +157,12 @@ public class CameraActivity extends Activity {
 
 
     public void log(Classifier.Recognition result) {
-        Toast.makeText(this, R.string.app_name, Toast.LENGTH_LONG).show();
+
+        if(result.getConfidence()>0.3){
+            if(result.getTitle().contains("jack-o'-lantern")){
+                Toast.makeText(getApplicationContext(), "Happy Halloween: ", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 }
