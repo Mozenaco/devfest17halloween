@@ -74,12 +74,13 @@ public class TensorFlowImageListener implements OnImageAvailableListener {
   private Handler handler;
 
   private RecognitionScoreView scoreView;
+  private ListenerResult listenerResult;
 
   public void initialize(
-      final AssetManager assetManager,
-      final RecognitionScoreView scoreView,
-      final Handler handler,
-      final Integer sensorOrientation) {
+          final AssetManager assetManager,
+          final RecognitionScoreView scoreView,
+          final Handler handler,
+          final Integer sensorOrientation,ListenerResult listenerResult) {
     Assert.assertNotNull(sensorOrientation);
     tensorflow.initializeTensorFlow(
         assetManager, MODEL_FILE, LABEL_FILE, NUM_CLASSES, INPUT_SIZE, IMAGE_MEAN, IMAGE_STD,
@@ -87,6 +88,7 @@ public class TensorFlowImageListener implements OnImageAvailableListener {
     this.scoreView = scoreView;
     this.handler = handler;
     this.sensorOrientation = sensorOrientation;
+    this.listenerResult =listenerResult;
   }
 
   private void drawResizedBitmap(final Bitmap src, final Bitmap dst) {
@@ -197,6 +199,7 @@ public class TensorFlowImageListener implements OnImageAvailableListener {
             LOGGER.v("%d results", results.size());
             for (final Classifier.Recognition result : results) {
               LOGGER.v("Result: " + result.getTitle());
+              listenerResult.logResult(result);
             }
             scoreView.setResults(results);
             computing = false;

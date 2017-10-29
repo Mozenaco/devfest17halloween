@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TensorFlowAndroidDemo.iml" filepath="$PROJECT_DIR$/TensorFlowAndroidDemo.iml" />
+      <module fileurl="file://C:\Users\danie\Dev\devfestdublin2017\devfest17halloween\TensorFlowAndroidDemo.iml" filepath="C:\Users\danie\Dev\devfestdublin2017\devfest17halloween\TensorFlowAndroidDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\danie\Dev\devfestdublin2017\devfest17halloween\app\app.iml" filepath="C:\Users\danie\Dev\devfestdublin2017\devfest17halloween\app\app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/devfest17halloween.iml" filepath="$PROJECT_DIR$/devfest17halloween.iml" />
     </modules>
   </component>
 </project>

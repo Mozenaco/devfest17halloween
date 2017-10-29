@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -85,4 +86,8 @@ public class CameraActivity extends Activity {
             .replace(R.id.container, CameraConnectionFragment.newInstance())
             .commit();
   }
+
+    public void log(Classifier.Recognition result) {
+    Toast.makeText(this,R.string.app_name,Toast.LENGTH_LONG).show();
+    }
 }

@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Wrapper for the platform log function, allows convenient message prefixing and log disabling.
+ * Wrapper for the platform logResult function, allows convenient message prefixing and logResult disabling.
  */
 public final class Logger {
   private static final String DEFAULT_TAG = "tensorflow";
@@ -63,7 +63,7 @@ public final class Logger {
    * Creates a Logger with a custom tag and a custom message prefix. If the message prefix
    * is set to <pre>null</pre>, the caller's class name is used as the prefix.
    *
-   * @param tag identifies the source of a log message.
+   * @param tag identifies the source of a logResult message.
    * @param messagePrefix prepended to every message if non-null. If null, the name of the caller is
    *                      being used
    */
